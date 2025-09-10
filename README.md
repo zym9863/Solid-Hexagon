@@ -1,5 +1,7 @@
 # 旋转六边形弹跳球 🎮
 
+> **语言 / Language**: [中文](README.md) | [English](README-EN.md)
+
 基于Solid.js构建的物理引擎模拟游戏，展示了重力、摩擦力和弹性碰撞的物理效果。
 
 ## ✨ 功能特色
