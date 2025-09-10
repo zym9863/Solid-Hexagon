@@ -173,21 +173,62 @@ export default function BouncingBall(props: BouncingBallProps) {
     const trailPoints = trails();
     if (trailPoints.length < 2) return;
 
-    ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
-    ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-
+    
+    // 彩虹渐变色轨迹
+    const colors = [
+      '#ff6b6b', '#ffa500', '#ffff00', '#90ee90', 
+      '#00bfff', '#9370db', '#ff69b4'
+    ];
+    
     for (let i = 1; i < trailPoints.length; i++) {
       const alpha = i / trailPoints.length;
       const point = trailPoints[i];
       const prevPoint = trailPoints[i - 1];
-
-      ctx.globalAlpha = alpha * 0.5;
+      const colorIndex = Math.floor((i / trailPoints.length) * colors.length);
+      const color = colors[colorIndex] || colors[colors.length - 1];
+      
+      // 创建渐变色线段
+      const segmentGradient = ctx.createLinearGradient(
+        prevPoint.x, prevPoint.y,
+        point.x, point.y
+      );
+      segmentGradient.addColorStop(0, `${color}${Math.floor(alpha * 0.3 * 255).toString(16).padStart(2, '0')}`);
+      segmentGradient.addColorStop(1, `${color}${Math.floor(alpha * 0.6 * 255).toString(16).padStart(2, '0')}`);
+      
+      ctx.strokeStyle = segmentGradient;
+      ctx.lineWidth = 3 * alpha + 1; // 粗细渐变
+      ctx.globalAlpha = alpha * 0.8;
+      
       ctx.beginPath();
       ctx.moveTo(prevPoint.x, prevPoint.y);
       ctx.lineTo(point.x, point.y);
       ctx.stroke();
+      
+      // 添加发光效果
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 5 * alpha;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    
+    // 添加粒子效果
+    for (let i = 0; i < trailPoints.length; i += 5) {
+      const point = trailPoints[i];
+      const alpha = i / trailPoints.length;
+      const size = 2 * alpha + 1;
+      
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.6})`;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 粒子发光
+      ctx.shadowColor = '#ffffff';
+      ctx.shadowBlur = 3;
+      ctx.fill();
+      ctx.shadowBlur = 0;
     }
 
     ctx.globalAlpha = 1;
@@ -198,9 +239,20 @@ export default function BouncingBall(props: BouncingBallProps) {
    */
   function drawHexagon(ctx: CanvasRenderingContext2D, hex: Hexagon) {
     const vertices = hex.vertices;
+    const center = hex.center;
+    const time = performance.now() * 0.001; // 获取时间用于动画
     
-    // 绘制六边形填充
-    ctx.fillStyle = 'rgba(50, 100, 150, 0.1)';
+    // 动态背景填充
+    const fillGradient = ctx.createRadialGradient(
+      center.x, center.y, 0,
+      center.x, center.y, hex.radius
+    );
+    const alpha = 0.1 + Math.sin(time * 2) * 0.05; // 动态透明度
+    fillGradient.addColorStop(0, `rgba(74, 144, 226, ${alpha * 0.5})`);
+    fillGradient.addColorStop(0.7, `rgba(50, 100, 150, ${alpha})`);
+    fillGradient.addColorStop(1, `rgba(30, 60, 90, ${alpha * 0.3})`);
+    
+    ctx.fillStyle = fillGradient;
     ctx.beginPath();
     ctx.moveTo(vertices[0].x, vertices[0].y);
     for (let i = 1; i < vertices.length; i++) {
@@ -209,21 +261,57 @@ export default function BouncingBall(props: BouncingBallProps) {
     ctx.closePath();
     ctx.fill();
 
-    // 绘制六边形边框
-    ctx.strokeStyle = '#4a90e2';
+    // 绘制六边形边框 - 带有脉冲效果
+    const pulseIntensity = 0.8 + Math.sin(time * 3) * 0.2;
+    ctx.strokeStyle = `rgba(74, 144, 226, ${pulseIntensity})`;
     ctx.lineWidth = 3;
     ctx.shadowColor = '#4a90e2';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 15 + Math.sin(time * 4) * 5; // 动态阴影
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // 绘制顶点
-    ctx.fillStyle = '#6bb6ff';
-    for (const vertex of vertices) {
+    // 绘制顶点 - 带有呼吸效果
+    for (let i = 0; i < vertices.length; i++) {
+      const vertex = vertices[i];
+      const breathe = 1 + Math.sin(time * 2 + i * Math.PI / 3) * 0.3;
+      const vertexAlpha = 0.8 + Math.sin(time * 3 + i * Math.PI / 4) * 0.2;
+      
+      // 顶点外发光
+      const vertexGlow = ctx.createRadialGradient(
+        vertex.x, vertex.y, 0,
+        vertex.x, vertex.y, 8 * breathe
+      );
+      vertexGlow.addColorStop(0, `rgba(107, 182, 255, ${vertexAlpha})`);
+      vertexGlow.addColorStop(1, 'rgba(107, 182, 255, 0)');
+      
+      ctx.fillStyle = vertexGlow;
       ctx.beginPath();
-      ctx.arc(vertex.x, vertex.y, 4, 0, Math.PI * 2);
+      ctx.arc(vertex.x, vertex.y, 8 * breathe, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 顶点核心
+      ctx.fillStyle = '#6bb6ff';
+      ctx.beginPath();
+      ctx.arc(vertex.x, vertex.y, 4 * breathe, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 顶点高光
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.beginPath();
+      ctx.arc(vertex.x - 1, vertex.y - 1, 1.5 * breathe, 0, Math.PI * 2);
       ctx.fill();
     }
+    
+    // 添加能量环效果
+    const ringRadius = hex.radius + 10 + Math.sin(time * 2) * 5;
+    const ringAlpha = 0.3 + Math.sin(time * 3) * 0.2;
+    ctx.strokeStyle = `rgba(74, 144, 226, ${ringAlpha})`;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, ringRadius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   /**
@@ -236,6 +324,20 @@ export default function BouncingBall(props: BouncingBallProps) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
     ctx.arc(position.x + 3, position.y + 3, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 外层发光效果
+    const glowGradient = ctx.createRadialGradient(
+      position.x, position.y, radius * 0.8,
+      position.x, position.y, radius * 2
+    );
+    glowGradient.addColorStop(0, 'rgba(255, 107, 107, 0.4)');
+    glowGradient.addColorStop(0.5, 'rgba(255, 107, 107, 0.2)');
+    glowGradient.addColorStop(1, 'rgba(255, 107, 107, 0)');
+    
+    ctx.fillStyle = glowGradient;
+    ctx.beginPath();
+    ctx.arc(position.x, position.y, radius * 2, 0, Math.PI * 2);
     ctx.fill();
 
     // 小球主体渐变
@@ -252,15 +354,21 @@ export default function BouncingBall(props: BouncingBallProps) {
     ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // 小球高光
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    // 内层高光
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.beginPath();
-    ctx.arc(position.x - radius/3, position.y - radius/3, radius/3, 0, Math.PI * 2);
+    ctx.arc(position.x - radius/3, position.y - radius/3, radius/4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 次要高光
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(position.x + radius/4, position.y + radius/4, radius/6, 0, Math.PI * 2);
     ctx.fill();
 
     // 小球边框
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
     ctx.stroke();
