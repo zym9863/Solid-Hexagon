@@ -26,6 +26,7 @@ export class PhysicsEngine {
   private ballState: BallState;
   private hexagon: Hexagon;
   private isRunning: boolean = false;
+  private collisionThisFrame: boolean = false;
 
   constructor(config: PhysicsConfig, hexagon: Hexagon) {
     this.config = { ...config };
@@ -47,6 +48,9 @@ export class PhysicsEngine {
    */
   update(deltaTime: number): void {
     if (!this.isRunning) return;
+
+    // 重置碰撞标志
+    this.collisionThisFrame = false;
 
     // 限制deltaTime避免物理不稳定
     deltaTime = Math.min(deltaTime, 0.016); // 最大16ms
@@ -134,6 +138,7 @@ export class PhysicsEngine {
     );
 
     if (collision.isColliding && collision.collisionEdge && collision.collisionPoint) {
+      this.collisionThisFrame = true;
       this.resolveCollision(collision.collisionEdge, collision.penetrationDepth || 0);
     }
   }
@@ -259,5 +264,12 @@ export class PhysicsEngine {
    */
   getVelocity(): number {
     return this.ballState.velocity.magnitude();
+  }
+
+  /**
+   * 检查本帧是否发生碰撞
+   */
+  hasCollisionThisFrame(): boolean {
+    return this.collisionThisFrame;
   }
 }
