@@ -1,27 +1,281 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+/** 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+/** 应用主容器 */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+/** 头部样式 */
+.app-header {
   text-align: center;
+  margin-bottom: 30px;
+  animation: fadeInDown 0.8s ease-out;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.solid:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.card {
-  padding: 2em;
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  font-weight: 300;
 }
 
-.read-the-docs {
-  color: #888;
+/** 主内容区域 */
+.app-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+/** 底部样式 */
+.app-footer {
+  text-align: center;
+  max-width: 600px;
+}
+
+.instructions {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.instructions h3 {
+  margin-bottom: 15px;
+  color: #4ecdc4;
+}
+
+.instructions ul {
+  list-style: none;
+  text-align: left;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.instructions li::before {
+  content: '▶';
+  position: absolute;
+  left: 0;
+  color: #ff6b6b;
+}
+
+/** 弹跳球容器样式 */
+.bouncing-ball-container {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.game-canvas {
+  display: block;
+  border-radius: 18px;
+}
+
+/** 控制面板样式 */
+.controls-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 20px;
+  min-width: 250px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.control-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.control-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.control-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.control-button.active {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.slider-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.slider-group input[type="range"] {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.slider-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider-group input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/** 动画效果 */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/** 响应式设计 */
+@media (max-width: 1024px) {
+  .app-header h1 {
+    font-size: 2rem;
+  }
+  
+  .controls-panel {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .bouncing-ball-container {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .app {
+    padding: 10px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .controls-panel {
+    padding: 15px;
+    min-width: auto;
+  }
+  
+  .control-group {
+    justify-content: center;
+  }
+  
+  .stats {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
 }
